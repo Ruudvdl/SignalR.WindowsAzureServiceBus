@@ -38,6 +38,7 @@ namespace SignalR.WindowsAzureServiceBus
 
         static readonly Random rnd = new Random();
         readonly TimeSpan cacheTtl = TimeSpan.FromSeconds(30);
+        readonly TimeSpan defaultTtl;
         readonly List<ServiceBusMessageBusCache> caches;
         readonly string instanceId; // the instance-id of this node in the scale-out fabric
         readonly List<MessagingFactory> messagingFactories; // factory
@@ -50,7 +51,7 @@ namespace SignalR.WindowsAzureServiceBus
         bool isOpen; // flag for whether we're 'open', i.e. have a valid mesaging factory
         NamespaceManager namespaceManager;
 
-        public ServiceBusMessageBus(string topicPathPrefix, int numberOfTopics, string serviceBusNamespace, string serviceBusAccount, string serviceBusAccountKey, string instanceId)
+        public ServiceBusMessageBus(string topicPathPrefix, int numberOfTopics, string serviceBusNamespace, string serviceBusAccount, string serviceBusAccountKey, string instanceId, TimeSpan defaultTtl)
         {
             this.TopicPathPrefix = topicPathPrefix;
             this.NumberOfTopics = numberOfTopics;
@@ -59,6 +60,7 @@ namespace SignalR.WindowsAzureServiceBus
             this.topicClients = new List<TopicClient>();
             this.subscriptionClients = new List<SubscriptionClient>();
             this.instanceId = instanceId ?? Environment.MachineName;
+            this.defaultTtl = defaultTtl;
 
             if (serviceBusNamespace != null)
             {
@@ -330,7 +332,9 @@ namespace SignalR.WindowsAzureServiceBus
                 this.topicClients.Add(this.messagingFactories[topicNumber].CreateTopicClient(topicName));
                 if (!this.namespaceManager.SubscriptionExists(topicName, this.instanceId))
                 {
-                    this.namespaceManager.CreateSubscription(topicName, this.instanceId);
+                    var subdes = new Microsoft.ServiceBus.Messaging.SubscriptionDescription(topicName, this.instanceId);
+                    subdes.DefaultMessageTimeToLive = defaultTtl;
+                    this.namespaceManager.CreateSubscription(subdes);
                 }
                 var subscriptionClient = this.messagingFactories[topicNumber].CreateSubscriptionClient(topicName, this.instanceId, ReceiveMode.ReceiveAndDelete);
                 subscriptionClient.PrefetchCount = 1;

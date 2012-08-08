@@ -24,10 +24,28 @@ namespace SignalR.WindowsAzureServiceBus
     {
 
         public static IDependencyResolver UseWindowsAzureServiceBus(this IDependencyResolver resolver,
+                                                            string serviceBusNamespace,
+                                                            string serviceBusAccount,
+                                                            string serviceBusAccountKey,
+                                                            string topicPathPrefix,
+                                                            int numberOfTopics)
+        {
+
+            return UseWindowsAzureServiceBus(resolver,
+                                             serviceBusNamespace,
+                                             serviceBusAccount,
+                                             serviceBusAccountKey,
+                                             topicPathPrefix,
+                                             TimeSpan.MaxValue,
+                                             numberOfTopics);
+        }
+
+        public static IDependencyResolver UseWindowsAzureServiceBus(this IDependencyResolver resolver,
                                                                     string serviceBusNamespace,
                                                                     string serviceBusAccount,
                                                                     string serviceBusAccountKey,
                                                                     string topicPathPrefix,
+                                                                    TimeSpan messageDefaultTtl,
                                                                     int numberOfTopics)
         {
             var instanceId = Environment.MachineName + "_" + GetRoleInstanceNumber().ToString();
@@ -38,6 +56,7 @@ namespace SignalR.WindowsAzureServiceBus
                                              serviceBusAccountKey, 
                                              topicPathPrefix, 
                                              numberOfTopics,
+                                             messageDefaultTtl,
                                              instanceId);
         }
 
@@ -47,14 +66,17 @@ namespace SignalR.WindowsAzureServiceBus
                                                                     string serviceBusAccountKey,
                                                                     string topicPathPrefix,
                                                                     int numberOfTopics,
-                                                                    string instanceId)
+                                                                    TimeSpan messageDefaultTtl,
+                                                                    string instanceId
+                                                                    )
         {
             var bus = new Lazy<ServiceBusMessageBus>(() => new ServiceBusMessageBus(topicPathPrefix, 
                                                                                     numberOfTopics, 
                                                                                     serviceBusNamespace, 
                                                                                     serviceBusAccount, 
                                                                                     serviceBusAccountKey, 
-                                                                                    instanceId));
+                                                                                    instanceId,
+                                                                                    messageDefaultTtl));
             resolver.Register(typeof(IMessageBus), () => bus.Value);
             return resolver;
         }
