@@ -24,11 +24,11 @@ namespace SignalR.WindowsAzureServiceBus
     {
 
         public static IDependencyResolver UseWindowsAzureServiceBus(this IDependencyResolver resolver,
-                                                            string serviceBusNamespace,
-                                                            string serviceBusAccount,
-                                                            string serviceBusAccountKey,
-                                                            string topicPathPrefix,
-                                                            int numberOfTopics)
+                                                                    string serviceBusNamespace,
+                                                                    string serviceBusAccount,
+                                                                    string serviceBusAccountKey,
+                                                                    string topicPathPrefix,
+                                                                    int numberOfTopics)
         {
 
             return UseWindowsAzureServiceBus(resolver,

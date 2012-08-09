@@ -332,7 +332,7 @@ namespace SignalR.WindowsAzureServiceBus
                 this.topicClients.Add(this.messagingFactories[topicNumber].CreateTopicClient(topicName));
                 if (!this.namespaceManager.SubscriptionExists(topicName, this.instanceId))
                 {
-                    var subdes = new Microsoft.ServiceBus.Messaging.SubscriptionDescription(topicName, this.instanceId);
+                    var subdes = new SubscriptionDescription(topicName, this.instanceId);
                     subdes.DefaultMessageTimeToLive = defaultTtl;
                     this.namespaceManager.CreateSubscription(subdes);
                 }
